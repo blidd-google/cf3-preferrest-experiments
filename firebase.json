@@ -1,8 +1,34 @@
 {
   "functions": [
     {
-      "source": "functions",
+      "source": "prefer-rest-on",
       "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    },
+    {
+      "source": "experiments",
+      "codebase": "experiments",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    },
+    {
+      "source": "prefer-rest-off",
+      "codebase": "prefer-rest-off",
       "ignore": [
         "node_modules",
         ".git",
