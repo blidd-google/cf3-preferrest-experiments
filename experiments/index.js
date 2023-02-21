@@ -62,7 +62,7 @@ const runexperiment = functions.https.onRequest(async (req, res) => {
   }
   await Promise.all(enqueues);
   res.send(
-      `Experiment started for function at ${functionUrl}!` +
+      `Experiment started for function at ${functionUrl}! ` +
       "Watch for the results in your function logs.",
   );
 });
