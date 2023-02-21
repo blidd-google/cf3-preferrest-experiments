@@ -12,12 +12,12 @@ const origin = "https://cloudfunctions.googleapis.com";
 /**
  * Get the URL of a cold start test function.
  *
- * @param {boolean} preferRest the function's name
- * @param {string} version the function's name
+ * @param {boolean} name the function's name
+ * @param {string} version the function's version
  * @param {string} location the function's location
  * @return {Promise<string>} The URL of the function
  */
-async function getFunctionUrl(preferRest, version, location="us-central1") {
+async function getFunctionUrl(name, version, location="us-central1") {
   if (!auth) {
     auth = new GoogleAuth({
       scopes: "https://www.googleapis.com/auth/cloud-platform",
@@ -25,9 +25,8 @@ async function getFunctionUrl(preferRest, version, location="us-central1") {
   }
 
   const projectId = await auth.getProjectId();
-  const name = preferRest ? "preferreston" : "preferrestoff";
   const apiUrl = `${origin}/${version}/` +
-      `projects/${projectId}/locations/${location}/functions/${name}${version}`;
+      `projects/${projectId}/locations/${location}/functions/${name}`;
 
   const client = await auth.getClient();
   const res = await client.request({url: apiUrl});
@@ -42,10 +41,10 @@ async function getFunctionUrl(preferRest, version, location="us-central1") {
 // This HTTPS function triggers the cold start benchmarking experiment.
 const runexperiment = functions.https.onRequest(async (req, res) => {
   const sampleSize = req.query.sampleSize; // number
-  const preferRest = req.query.preferRest === "true"; // "true" or "false"
+  const name = req.query.name;
   const version = req.query.version; // string: v1 or v2
 
-  const functionUrl = await getFunctionUrl(preferRest, version);
+  const functionUrl = await getFunctionUrl(name, version);
 
   const queue = getFunctions().taskQueue("triggercoldstart");
   const enqueues = [];
