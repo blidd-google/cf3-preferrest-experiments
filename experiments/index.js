@@ -54,6 +54,7 @@ const runexperiment = functions.https.onRequest(async (req, res) => {
             {
               id: `coldstart-${i}`,
               url: functionUrl,
+              name,
             },
             {dispatchDeadlineSeconds: 60 * 5},
         ),
@@ -66,15 +67,7 @@ const runexperiment = functions.https.onRequest(async (req, res) => {
   );
 });
 
-
-// const testgeturl = functions.https.onRequest(async (req, res) => {
-//   const preferRest = req.query.preferRest === "true"; // boolean
-//   const version = req.query.version; // string: v1 or v2
-//   functions.logger.debug(`preferRest: ${preferRest}, version: ${version}`);
-
-//   const url = await getFunctionUrl(preferRest, version);
-//   res.send({url, message: "hello"});
-// });
+/* global BigInt */
 
 // This task simulates a single HTTP request to the function we are testing
 // for cold start performance.
@@ -84,8 +77,15 @@ const triggercoldstart = functions.tasks.taskQueue({
   },
 }).onDispatch(async (data) => {
   // We don't care about the response. We know it's going to crash
-  functions.logger.debug(`fetching from url ${data.url}`);
+  const start = process.hrtime.bigint();
   await fetch(data.url);
+  const stop = process.hrtime.bigint();
+  // const elapsedNanos = stop - start;
+
+  functions.logger.log(`Cold start experiment data for ${data.name}:`, {
+    name: data.name,
+    elapsedMs: Number((stop - start) / BigInt(1000000)),
+  });
 });
 
 export {

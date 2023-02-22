@@ -6,7 +6,7 @@ const {
 } = require("firebase-admin/firestore");
 
 const app = admin.initializeApp();
-initializeFirestore(app, {preferRest: false});
+initializeFirestore(app);
 
 exports.preferrestoffv1 = functions.https.onRequest(async (req, res) => {
   const text = "hello";
