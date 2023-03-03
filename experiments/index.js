@@ -2,7 +2,6 @@ import functions from "firebase-functions";
 import {initializeApp} from "firebase-admin/app";
 import {getFunctions} from "firebase-admin/functions";
 import {GoogleAuth} from "google-auth-library";
-// import fetch from "node-fetch";
 
 initializeApp();
 
@@ -89,7 +88,6 @@ const triggercoldstart = functions.tasks.taskQueue({
   } catch (err) {
     console.log("error expected");
   }
-  // await fetch(data.url);
   const stop = process.hrtime.bigint();
 
   functions.logger.log(`Cold start experiment data for ${data.name}:`, {
