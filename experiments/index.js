@@ -2,7 +2,7 @@ import functions from "firebase-functions";
 import {initializeApp} from "firebase-admin/app";
 import {getFunctions} from "firebase-admin/functions";
 import {GoogleAuth} from "google-auth-library";
-import fetch from "node-fetch";
+// import fetch from "node-fetch";
 
 initializeApp();
 
@@ -43,6 +43,7 @@ const runexperiment = functions.https.onRequest(async (req, res) => {
   const sampleSize = req.query.sampleSize; // number
   const name = req.query.name;
   const version = req.query.version; // string: v1 or v2
+  const delay = Number(req.query.delay ?? 0);
 
   const functionUrl = await getFunctionUrl(name, version);
 
@@ -56,7 +57,10 @@ const runexperiment = functions.https.onRequest(async (req, res) => {
               url: functionUrl,
               name,
             },
-            {dispatchDeadlineSeconds: 60 * 5},
+            {
+              dispatchDeadlineSeconds: 60 * 5,
+              scheduleDelaySeconds: i * delay,
+            },
         ),
     );
   }
@@ -76,11 +80,17 @@ const triggercoldstart = functions.tasks.taskQueue({
     maxConcurrentDispatches: 100,
   },
 }).onDispatch(async (data) => {
-  // We don't care about the response. We know it's going to crash
   const start = process.hrtime.bigint();
-  await fetch(data.url);
+  const client = await new GoogleAuth().getIdTokenClient(data.url);
+  try {
+    await client.request({
+      url: data.url,
+    });
+  } catch (err) {
+    console.log("error expected");
+  }
+  // await fetch(data.url);
   const stop = process.hrtime.bigint();
-  // const elapsedNanos = stop - start;
 
   functions.logger.log(`Cold start experiment data for ${data.name}:`, {
     name: data.name,
